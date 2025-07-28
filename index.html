@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حاسبة الميزانية المتقدمة</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 15px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #2c3e50, #34495e);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.8em;
+            font-weight: 300;
+        }
+
+        .header p {
+            margin: 5px 0 0 0;
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            border: 2px solid #e9ecef;
+        }
+
+        .section-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 8px;
+        }
+
+        .input-row {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .input-row label {
+            font-weight: 500;
+            color: #2c3e50;
+            font-size: 0.95em;
+        }
+
+        .input-row input {
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .input-row input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .results-section {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .available-income {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+        }
+
+        .available-amount {
+            font-size: 2em;
+            font-weight: 300;
+            margin: 10px 0;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .category-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid;
+            transition: transform 0.3s ease;
+        }
+
+        .category-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .needs {
+            border-left-color: #e74c3c;
+        }
+
+        .wants {
+            border-left-color: #f39c12;
+        }
+
+        .savings {
+            border-left-color: #27ae60;
+        }
+
+        .category-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .category-amount {
+            font-size: 1.6em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .remaining-amount {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .remaining-positive {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .remaining-negative {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .examples {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .examples h4 {
+            margin: 0 0 8px 0;
+            color: #2c3e50;
+            font-size: 0.9em;
+        }
+
+        .examples ul {
+            margin: 0;
+            padding-right: 15px;
+        }
+
+        .examples li {
+            margin: 3px 0;
+            color: #7f8c8d;
+            font-size: 0.8em;
+        }
+
+        .commitment-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .total-commitments {
+            font-weight: 600;
+            color: #e74c3c;
+            font-size: 1.1em;
+            padding-top: 15px;
+            border-top: 2px solid #e74c3c;
+            margin-top: 15px;
+        }
+
+        /* Expense Tracking Styles */
+        .expense-section {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+        }
+
+        .expense-category {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid;
+        }
+
+        .expense-category.needs-expense {
+            border-left-color: #e74c3c;
+        }
+
+        .expense-category.wants-expense {
+            border-left-color: #f39c12;
+        }
+
+        .expense-category.savings-expense {
+            border-left-color: #27ae60;
+        }
+
+        .expense-category h4 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+            font-size: 1em;
+        }
+
+        .expense-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .expense-item input[type="text"] {
+            flex: 2;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .expense-item input[type="number"] {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .add-expense-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .add-expense-btn:hover {
+            background: #0056b3;
+        }
+
+        .delete-expense {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .delete-expense:hover {
+            background: #c82333;
+        }
+
+        .expense-total {
+            font-weight: 600;
+            color: #dc3545;
+            text-align: center;
+            margin-top: 10px;
+            padding: 8px;
+            background: #f8d7da;
+            border-radius: 5px;
+        }
+
+        /* Mobile optimizations for iPhone 11 Pro Max */
+        @media (max-width: 414px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .content {
+                padding: 15px;
+            }
+
+            .section {
+                padding: 15px;
+                margin-bottom: 12px;
+            }
+
+            .category-amount {
+                font-size: 1.4em;
+            }
+
+            .available-amount {
+                font-size: 1.8em;
+            }
+
+            .input-row input {
+                padding: 10px 12px;
+                font-size: 16px;
+                /* Prevents zoom on iOS */
+            }
+
+            .expense-item {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .expense-item input {
+                width: 100%;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 حاسبة الميزانية المتقدمة</h1>
+            <p>الالتزامات الثابتة أولاً، ثم قاعدة 50-30-20</p>
+        </div>
+
+        <div class="content">
+            <!-- الدخل الشهري -->
+            <div class="section">
+                <div class="section-title">📊 الدخل الشهري</div>
+                <div class="input-row">
+                    <label>إجمالي الدخل:</label>
+                    <input type="number" id="total-income" value="55000" placeholder="55000">
+                    <span>جنيه</span>
+                </div>
+            </div>
+
+            <!-- الالتزامات الثابتة -->
+            <div class="section">
+                <div class="section-title">🔴 الالتزامات الثابتة (غير قابلة للتأجيل)</div>
+
+                <div class="input-row">
+                    <label>قسط شهري:</label>
+                    <input type="number" id="monthly-installment" value="12000" placeholder="12000">
+                    <span>جنيه</span>
+                </div>
+
+                <div class="input-row">
+                    <label>عشور:</label>
+                    <input type="number" id="tithe" value="4000" placeholder="4000">
+                    <span>جنيه</span>
+                </div>
+
+                <div class="input-row">
+                    <label>مساعدة شخص:</label>
+                    <input type="number" id="personal-help" value="3000" placeholder="3000">
+                    <span>جنيه</span>
+                </div>
+
+                <div class="input-row">
+                    <label>قسط العربية:</label>
+                    <input type="number" id="car-installment" value="2000" placeholder="2000">
+                    <span>جنيه</span>
+                </div>
+            </div>
+
+            <!-- تتبع المصروفات الفعلية -->
+            <div class="section expense-section">
+                <div class="section-title">📝 تتبع المصروفات الفعلية</div>
+
+                <!-- مصروفات الاحتياجات الأساسية -->
+                <div class="expense-category needs-expense">
+                    <h4>🏠 مصروفات الاحتياجات الأساسية</h4>
+                    <div id="needs-expenses"></div>
+                    <button class="add-expense-btn" onclick="addExpense('needs')">إضافة مصروف</button>
+                    <div class="expense-total" id="needs-total">المجموع: 0 جنيه</div>
+                </div>
+
+                <!-- مصروفات الرغبات والترفيه -->
+                <div class="expense-category wants-expense">
+                    <h4>🎯 مصروفات الرغبات والترفيه</h4>
+                    <div id="wants-expenses"></div>
+                    <button class="add-expense-btn" onclick="addExpense('wants')">إضافة مصروف</button>
+                    <div class="expense-total" id="wants-total">المجموع: 0 جنيه</div>
+                </div>
+
+                <!-- مصروفات الادخار والاستثمار -->
+                <div class="expense-category savings-expense">
+                    <h4>💰 مصروفات الادخار والاستثمار</h4>
+                    <div id="savings-expenses"></div>
+                    <button class="add-expense-btn" onclick="addExpense('savings')">إضافة مصروف</button>
+                    <div class="expense-total" id="savings-total">المجموع: 0 جنيه</div>
+                </div>
+            </div>
+
+            <!-- النتائج -->
+            <div class="results-section">
+                <div class="summary-card">
+                    <h3>📋 ملخص الالتزامات</h3>
+                    <div id="commitments-summary">
+                        <div class="commitment-item">
+                            <span>قسط شهري</span>
+                            <span id="display-installment">12,000 ج</span>
+                        </div>
+                        <div class="commitment-item">
+                            <span>عشور</span>
+                            <span id="display-tithe">4,000 ج</span>
+                        </div>
+                        <div class="commitment-item">
+                            <span>مساعدة شخص</span>
+                            <span id="display-help">3,000 ج</span>
+                        </div>
+                        <div class="commitment-item">
+                            <span>قسط العربية</span>
+                            <span id="display-car">2,000 ج</span>
+                        </div>
+                        <div class="commitment-item total-commitments">
+                            <span>إجمالي الالتزامات</span>
+                            <span id="total-commitments">21,000 ج</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-card">
+                    <h3>💡 المبلغ المتاح للتقسيم</h3>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <div style="font-size: 1.1em; color: #7f8c8d;">الدخل - الالتزامات الثابتة</div>
+                        <div style="font-size: 2em; font-weight: 300; color: #27ae60; margin: 10px 0;"
+                            id="available-income">34,000 ج</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="available-income">
+                <div>المبلغ المتاح لقاعدة 50-30-20</div>
+                <div class="available-amount" id="available-for-rule">34,000 جنيه</div>
+            </div>
+
+            <!-- تقسيم 50-30-20 مع المتبقي -->
+            <div class="category-grid">
+                <div class="category-card needs">
+                    <div class="category-title">🏠 الاحتياجات الأساسية (50%)</div>
+                    <div class="category-amount" id="needs-amount">17,000 جنيه</div>
+                    <div class="remaining-amount" id="needs-remaining">المتبقي: 17,000 جنيه</div>
+                    <div class="examples">
+                        <h4>أمثلة:</h4>
+                        <ul>
+                            <li><strong>صلح العربية</strong> - ده احتياج أساسي</li>
+                            <li><strong>مواصلات الشغل</strong> - احتياج أساسي</li>
+                            <li>الإيجار والفواتير</li>
+                            <li>الأكل الأساسي</li>
+                            <li>الأدوية والتأمين الصحي</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="category-card wants">
+                    <div class="category-title">🎯 الرغبات والترفيه (30%)</div>
+                    <div class="category-amount" id="wants-amount">10,200 جنيه</div>
+                    <div class="remaining-amount" id="wants-remaining">المتبقي: 10,200 جنيه</div>
+                    <div class="examples">
+                        <h4>أمثلة:</h4>
+                        <ul>
+                            <li><strong>كرسي أو مكتب للشغل</strong> - لو مش ضروري حالاً</li>
+                            <li>المطاعم والخروجات</li>
+                            <li>ملابس إضافية</li>
+                            <li>اشتراكات ترفيهية</li>
+                            <li>الهوايات والسفر</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="category-card savings">
+                    <div class="category-title">💰 الادخار والاستثمار (20%)</div>
+                    <div class="category-amount" id="savings-amount">6,800 جنيه</div>
+                    <div class="remaining-amount" id="savings-remaining">المتبقي: 6,800 جنيه</div>
+                    <div class="examples">
+                        <h4>أمثلة:</h4>
+                        <ul>
+                            <li>صندوق الطوارئ</li>
+                            <li>ادخار لأهداف مستقبلية</li>
+                            <li>استثمارات طويلة المدى</li>
+                            <li>تأمين على الحياة</li>
+                            <li>خطط التقاعد</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let expenseCounters = {
+            needs: 0,
+            wants: 0,
+            savings: 0
+        };
+
+        function addExpense(category) {
+            const container = document.getElementById(`${category}-expenses`);
+            const expenseId = `${category}-expense-${expenseCounters[category]++}`;
+
+            const expenseItem = document.createElement('div');
+            expenseItem.className = 'expense-item';
+            expenseItem.id = expenseId;
+
+            expenseItem.innerHTML = `
+            <input type="text" placeholder="اسم المصروف (مثل: حذاء، إيجار)" oninput="updateCalculations()">
+            <input type="number" placeholder="المبلغ" oninput="updateCalculations()">
+            <button class="delete-expense" onclick="deleteExpense('${expenseId}')">حذف</button>
+        `;
+
+            container.appendChild(expenseItem);
+            updateCalculations();
+        }
+
+        function deleteExpense(expenseId) {
+            const element = document.getElementById(expenseId);
+            element.remove();
+            updateCalculations();
+        }
+
+        function calculateCategoryExpenses(category) {
+            const container = document.getElementById(`${category}-expenses`);
+            const expenseItems = container.querySelectorAll('.expense-item');
+            let total = 0;
+
+            expenseItems.forEach(item => {
+                const amountInput = item.querySelector('input[type="number"]');
+                const amount = parseFloat(amountInput.value) || 0;
+                total += amount;
+            });
+
+            return total;
+        }
+
+        function updateCalculations() {
+            // جمع المدخلات
+            const totalIncome = parseFloat(document.getElementById('total-income').value) || 0;
+            const monthlyInstallment = parseFloat(document.getElementById('monthly-installment').value) || 0;
+            const tithe = parseFloat(document.getElementById('tithe').value) || 0;
+            const personalHelp = parseFloat(document.getElementById('personal-help').value) || 0;
+            const carInstallment = parseFloat(document.getElementById('car-installment').value) || 0;
+
+            // حساب إجمالي الالتزامات
+            const totalCommitments = monthlyInstallment + tithe + personalHelp + carInstallment;
+
+            // المبلغ المتاح للتقسيم
+            const availableIncome = totalIncome - totalCommitments;
+
+            // تقسيم 50-30-20
+            const needs = availableIncome * 0.5;
+            const wants = availableIncome * 0.3;
+            const savings = availableIncome * 0.2;
+
+            // حساب المصروفات الفعلية
+            const needsExpenses = calculateCategoryExpenses('needs');
+            const wantsExpenses = calculateCategoryExpenses('wants');
+            const savingsExpenses = calculateCategoryExpenses('savings');
+
+            // حساب المتبقي
+            const needsRemaining = needs - needsExpenses;
+            const wantsRemaining = wants - wantsExpenses;
+            const savingsRemaining = savings - savingsExpenses;
+
+            // تحديث العرض
+            document.getElementById('display-installment').textContent = monthlyInstallment.toLocaleString() + ' ج';
+            document.getElementById('display-tithe').textContent = tithe.toLocaleString() + ' ج';
+            document.getElementById('display-help').textContent = personalHelp.toLocaleString() + ' ج';
+            document.getElementById('display-car').textContent = carInstallment.toLocaleString() + ' ج';
+            document.getElementById('total-commitments').textContent = totalCommitments.toLocaleString() + ' ج';
+
+            document.getElementById('available-income').textContent = availableIncome.toLocaleString() + ' ج';
+            document.getElementById('available-for-rule').textContent = availableIncome.toLocaleString() + ' جنيه';
+
+            document.getElementById('needs-amount').textContent = needs.toLocaleString() + ' جنيه';
+            document.getElementById('wants-amount').textContent = wants.toLocaleString() + ' جنيه';
+            document.getElementById('savings-amount').textContent = savings.toLocaleString() + ' جنيه';
+
+            // تحديث مجاميع المصروفات
+            document.getElementById('needs-total').textContent = `المجموع: ${needsExpenses.toLocaleString()} جنيه`;
+            document.getElementById('wants-total').textContent = `المجموع: ${wantsExpenses.toLocaleString()} جنيه`;
+            document.getElementById('savings-total').textContent = `المجموع: ${savingsExpenses.toLocaleString()} جنيه`;
+
+            // تحديث المتبقي مع الألوان
+            updateRemainingDisplay('needs', needsRemaining);
+            updateRemainingDisplay('wants', wantsRemaining);
+            updateRemainingDisplay('savings', savingsRemaining);
+
+            // تغيير لون المبلغ المتاح حسب الحالة
+            const availableElement = document.getElementById('available-income');
+            if (availableIncome < 0) {
+                availableElement.style.color = '#e74c3c';
+            } else if (availableIncome < 10000) {
+                availableElement.style.color = '#f39c12';
+            } else {
+                availableElement.style.color = '#27ae60';
+            }
+        }
+
+        function updateRemainingDisplay(category, remaining) {
+            const element = document.getElementById(`${category}-remaining`);
+            element.textContent = `المتبقي: ${remaining.toLocaleString()} جنيه`;
+
+            if (remaining >= 0) {
+                element.className = 'remaining-amount remaining-positive';
+            } else {
+                element.className = 'remaining-amount remaining-negative';
+            }
+        }
+
+        // ربط الأحداث
+        document.getElementById('total-income').addEventListener('input', updateCalculations);
+        document.getElementById('monthly-installment').addEventListener('input', updateCalculations);
+        document.getElementById('tithe').addEventListener('input', updateCalculations);
+        document.getElementById('personal-help').addEventListener('input', updateCalculations);
+        document.getElementById('car-installment').addEventListener('input', updateCalculations);
+
+        // إضافة بعض المصروفات كأمثلة
+        addExpense('needs');
+        addExpense('wants');
+
+        // تشغيل الحسابات الأولية
+        updateCalculations();
+    </script>
+
+</body>
+
+</html>
